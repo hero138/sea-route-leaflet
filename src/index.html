@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sea Route</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+        integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <style>
+        body {
+            margin: 0px;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+</body>
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+<script src="curve.js"></script>
+<script src="astar.js"></script>
+<script src="route.js"></script>
+<script>
+    var map = L.map('map').setView([0, 0], 2);
+    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox.streets',
+    }).addTo(map);
+
+    var _firstLatLng, _secondLatLng, curve, path, markerB = null, markerB = null;
+    var source = [], destination = []
+
+    map.on('click', function (e) {
+        if (!_firstLatLng) {
+
+            _firstLatLng = e.latlng;
+
+            markerA = L.marker(_firstLatLng).addTo(map).bindPopup('Point A<br/>' + e.latlng).openPopup();
+            source = [_firstLatLng.lat, _firstLatLng.lng]
+
+        } else if (!_secondLatLng) {
+            _secondLatLng = e.latlng;
+
+            markerB = L.marker(_secondLatLng).addTo(map).bindPopup('Point B<br/>' + e.latlng).openPopup();
+            destination = [_secondLatLng.lat, _secondLatLng.lng]
+
+            curve = L.pathCurve(source, destination);
+            path = L.route(source, destination);
+
+            curve.addTo(map);
+        } else {
+
+            if (curve) {
+                map.removeLayer(curve);
+                curve = null;
+            }
+
+            _firstLatLng = e.latlng;
+            source = [_firstLatLng.lat, _firstLatLng.lng]
+
+            map.removeLayer(markerA);
+            map.removeLayer(markerB);
+            _secondLatLng = null;
+
+            markerA = L.marker(_firstLatLng).addTo(map).bindPopup('Point A<br/>' + e.latlng).openPopup();
+        }
+    });
+</script>
+</html>
